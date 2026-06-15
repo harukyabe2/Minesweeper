@@ -1,0 +1,38 @@
+#pragma once
+#include <Siv3D.hpp>
+#include "Cell.hpp"
+
+// Board class represents the game board
+class Board
+{
+    public:
+        Board();
+
+        void Update(Vec2 clickPos, bool leftClicked, bool rightClicked);
+        void Draw() const;
+
+        // Create the board with the given size and mine count
+        void CreateBoard(const Size& size, int32 mineCount);
+        // Get the mine count of the cell at the given position
+        int32 GetMineCount(const Point& pos);
+        // Get the cell index from the given position
+        Point GetIndexFromPos(const Vec2& pos);
+        // Open the cell at the given position
+        void OpenCell(const Point& pos);
+        // Check if the game is cleared or over
+        bool IsCleared() const { return mSafeCellCount == 0; }
+        bool IsGameOver() const { return mIsGameOver; }
+    private:
+        // The grid of cells
+        Grid<Cell> mCells;
+        // The offsets
+        Array<Point> mOffsets = {
+            {-1, -1}, {0, -1}, {1, -1},
+            {-1, 0},           {1, 0},
+            {-1, 1},  {0, 1},  {1, 1}
+        };
+        // The count of safe cells
+        int32 mSafeCellCount;
+        // Whether the game is over
+        bool mIsGameOver;
+};
