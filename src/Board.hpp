@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <Siv3D.hpp>
 #include "Cell.hpp"
 
@@ -10,6 +10,7 @@ class Board
 
         void Update(Vec2 clickPos, bool leftClicked, bool rightClicked);
         void Draw() const;
+		void Reset();
 
         // Create the board with the given size and mine count
         void CreateBoard(const Size& size, int32 mineCount);
@@ -31,6 +32,8 @@ class Board
             {-1, 0},           {1, 0},
             {-1, 1},  {0, 1},  {1, 1}
         };
+		// The mine positions
+		Array<Point> mMines;
         // The count of safe cells
         int32 mSafeCellCount;
         // Whether the game is over

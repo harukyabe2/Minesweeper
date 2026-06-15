@@ -1,4 +1,4 @@
-#include "Board.hpp"
+﻿#include "Board.hpp"
 
 Board::Board()
 : mSafeCellCount(0)
@@ -40,10 +40,21 @@ void Board::Draw() const
     }
 }
 
+void Board::Reset()
+{
+	mCells.clear();
+	mMines.clear();
+	mSafeCellCount = 0;
+	mIsGameOver = false;
+}
+
 void Board::CreateBoard(const Size& size, int32 mineCount)
 {
     mCells = Grid<Cell>(size);
     mSafeCellCount = size.x * size.y - mineCount;
+	// avoid reallocation
+	mMines.reserve(mineCount);
+
     // Randomly place mines
     while (mineCount)
     {
@@ -51,6 +62,7 @@ void Board::CreateBoard(const Size& size, int32 mineCount)
         if (mCells[pos].GetMineCount() == 0)
         {
             mCells[pos].SetMineCount(-1);
+			mMines.push_back(pos);
             --mineCount;
         }
     }
@@ -102,6 +114,7 @@ Point Board::GetIndexFromPos(const Vec2& pos)
 
 void Board::OpenCell(const Point& pos)
 {
+	// If the position is out of bounds, or the cell is already opened or flagged, do nothing
     if (pos.x < 0 || pos.x >= mCells.width() ||
         pos.y < 0 || pos.y >= mCells.height() ||
         mCells[pos].GetIsOpened() ||
@@ -112,6 +125,8 @@ void Board::OpenCell(const Point& pos)
     mCells[pos].SetIsOpened(true);
     --mSafeCellCount;
 
+	// If this cell has no mines around, open all its neighbors recursively
+	// If this cell is a mine, set it as exploded and open all mines, then end the game
     if (mCells[pos].GetMineCount() == 0)
     {
         for (const auto& offset : mOffsets)
@@ -122,6 +137,14 @@ void Board::OpenCell(const Point& pos)
     }
     else if (mCells[pos].GetMineCount() == -1)
     {
+		mCells[pos].SetIsExploded(true);
+		for (const auto& minePos : mMines)
+		{
+			if (minePos != pos)
+			{
+				mCells[minePos].SetIsOpened(true);
+			}
+		}
         mIsGameOver = true;
     }
 }

@@ -1,9 +1,10 @@
-#include "Cell.hpp"
+﻿#include "Cell.hpp"
 
 Cell::Cell()
 : mMineCount(0)
 , mIsOpened(false)
 , mIsFlagged(false)
+, mIsExploded(false)
 {
 }
 
@@ -19,7 +20,10 @@ void Cell::Draw(const Point& pos) const
         }
         else if (mMineCount == -1)
         {
-            Rect{Arg::center(pos), 50, 50}.drawFrame(1, Palette::Black).draw(Palette::Red);
+			if (mIsExploded)
+			{
+				Rect{Arg::center(pos), 50, 50}.drawFrame(1, Palette::Black).draw(Palette::Red);
+			}
             TextureAsset(U"Mine").scaled(0.3).drawAt(pos);
         }
     }
@@ -31,4 +35,12 @@ void Cell::Draw(const Point& pos) const
             TextureAsset(U"Flag").scaled(0.3).drawAt(pos);
         }
     }
+}
+
+void Cell::Reset()
+{
+	mMineCount = 0;
+	mIsOpened = false;
+	mIsFlagged = false;
+	mIsExploded = false;
 }

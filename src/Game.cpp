@@ -6,6 +6,8 @@ Game::Game()
 , mBoard()
 , mLeftClicked(false)
 , mRightClicked(false)
+, mKeyCIsPressed(false)
+, mKeyEIsPressed(false)
 , mClickPos(0, 0)
 {
 
@@ -37,26 +39,29 @@ void Game::RunLoop()
 
 void Game::ProcessInput()
 {
-    if (mState != GameState::isPlaying)
+    if (mState == GameState::isPlaying)
     {
-        return;
-    }
+		// Set camera
+		const auto t = mCamera.createTransformer();
 
-    // Set camera
-    const auto t = mCamera.createTransformer();
-
-    // Check for left mouse click
-    mLeftClicked = MouseL.down();
-    if (mLeftClicked)
-    {
-        mClickPos = Cursor::PosF();
+		// Check for left mouse click
+		mLeftClicked = MouseL.down();
+		if (mLeftClicked)
+		{
+		    mClickPos = Cursor::PosF();
+		}
+		// Check for right mouse click
+		mRightClicked = MouseR.down();
+		if (mRightClicked)
+		{
+		    mClickPos = Cursor::PosF();
+		}
     }
-    // Check for right mouse click
-    mRightClicked = MouseR.down();
-    if (mRightClicked)
-    {
-        mClickPos = Cursor::PosF();
-    }
+	else if (mState != GameState::isPlaying)
+	{
+		mKeyCIsPressed = KeyC.down();
+		mKeyEIsPressed = KeyE.down();
+	}
 }
 
 void Game::UpdateGame()
@@ -73,6 +78,22 @@ void Game::UpdateGame()
     {
         mState = GameState::isGameClear;
     }
+
+	// Continue or end the game on key press
+	if (mState != GameState::isPlaying)
+	{
+		if (mKeyCIsPressed)
+		{
+			mBoard.Reset();
+			mBoard.CreateBoard({ 24, 16 }, 80);
+			mState = GameState::isPlaying;
+			mKeyCIsPressed = false;
+		}
+		else if (mKeyEIsPressed)
+		{
+			System::Exit();
+		}
+	}
 }
 
 void Game::GenerateOutput()
@@ -86,13 +107,24 @@ void Game::GenerateOutput()
     // Draw game elements
     mBoard.Draw();
 
-    if (mState == GameState::isGameOver)
+	// Draw game over or clear message
+	if (mState == GameState::isGameOver)
     {
-        FontAsset(U"Message")(U"GAME OVER").drawAt({0, 0}, Palette::Red);
+		RectF(Vec2{ -640, -450 }, Size{ 1280, 900 }).draw(ColorF{ 0.0, 0.7 });
+        FontAsset(U"Message")(U"GAME OVER").drawAt(100, {0, -150}, Palette::Red);
+
+		double alpha = Periodic::Sine0_1(2.0s);
+        FontAsset(U"Message")(U"PRESS [C] to Continue").drawAt({0, 120}, ColorF{1.0, alpha});
+        FontAsset(U"Message")(U"PRESS [E] or [Esc] to End").drawAt({0, 190}, ColorF{1.0, alpha});
     }
     else if (mState == GameState::isGameClear)
     {
-        FontAsset(U"Message")(U"GAME CLEAR").drawAt({0, 0}, Palette::Yellow);
+		RectF(Vec2{ -640, -450 }, Size{ 1280, 900 }).draw(ColorF{ 0.0, 0.7 });
+        FontAsset(U"Message")(U"GAME CLEAR").drawAt({0, -150}, Palette::Yellow);
+
+		double alpha = Periodic::Sine0_1(2.0s);
+        FontAsset(U"Message")(U"PRESS [C] to Continue").drawAt({0, 120}, ColorF{1.0, alpha});
+        FontAsset(U"Message")(U"PRESS [E] or [Esc] to End").drawAt({0, 190}, ColorF{1.0, alpha});
     }
 }
 

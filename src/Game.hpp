@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <Siv3D.hpp>
 #include "Board.hpp"
 
@@ -33,13 +33,8 @@ class Game
         // Input state
         bool mLeftClicked;
         bool mRightClicked;
+		bool mKeyCIsPressed;
+		bool mKeyEIsPressed;
         // Click position
         Vec2 mClickPos;
 };
-
-/*
-後で見返す用
-Gameクラスはタイマーやクリア判定などゲーム進行管理
-Cellクラスはマスの状態管理
-BoardクラスはCellの二次元配列管理
-*/
